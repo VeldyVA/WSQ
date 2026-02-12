@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
 import { translations } from './translations';
-import html2pdf from 'html2pdf.js/dist/html2pdf.min.js';
+import { default as html2pdf } from 'html2pdf.js';
 
 function App() {
   const [language, setLanguage] = useState<'id' | 'en'>('id');
