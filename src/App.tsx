@@ -13,7 +13,10 @@ function App() {
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
     if (element) {
-      window.html2pdf().from(element).save('WSQ_Results.pdf');
+      // Add a small delay to ensure all content is rendered
+      setTimeout(() => {
+        window.html2pdf().from(element).save('WSQ_Results.pdf');
+      }, 500); // 500ms delay
     }
   };
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
