@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
 import { translations } from './translations';
-import { default as html2pdf } from 'html2pdf.js';
+import 'html2pdf.js';
 
 function App() {
   const [language, setLanguage] = useState<'id' | 'en'>('id');
@@ -13,7 +13,7 @@ function App() {
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
     if (element) {
-      html2pdf().from(element).save('WSQ_Results.pdf');
+      window.html2pdf().from(element).save('WSQ_Results.pdf');
     }
   };
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
