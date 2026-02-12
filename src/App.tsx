@@ -1,42 +1,21 @@
 import React, { useState } from 'react';
-import { Brain, Coffee, BrainCircuit } from 'lucide-react';
-
-interface Question {
-  id: number;
-  text: string;
-  isReversed: boolean;
-  section: number;
-}
-
-const questions: Question[] = [
-  { id: 1, text: "Saya merasa beban kerja saya terlalu berat.", isReversed: false, section: 1 },
-  { id: 2, text: "Saya sering harus menyelesaikan banyak tugas dalam waktu yang singkat.", isReversed: false, section: 1 },
-  { id: 3, text: "Saya memiliki waktu yang cukup untuk menyelesaikan pekerjaan saya dengan baik.", isReversed: true, section: 1 },
-  { id: 4, text: "Saya memiliki hubungan kerja yang baik dengan rekan kerja saya.", isReversed: true, section: 2 },
-  { id: 5, text: "Saya merasa didukung oleh atasan saya dalam menyelesaikan pekerjaan.", isReversed: true, section: 2 },
-  { id: 6, text: "Konflik interpersonal sering terjadi di lingkungan kerja saya.", isReversed: false, section: 2 },
-  { id: 7, text: "Tugas dan tanggung jawab saya di tempat kerja sudah jelas.", isReversed: true, section: 3 },
-  { id: 8, text: "Saya merasa pekerjaan saya sesuai dengan kemampuan saya.", isReversed: true, section: 3 },
-  { id: 9, text: "Saya merasa memiliki cukup kendali atas keputusan dalam pekerjaan saya.", isReversed: true, section: 3 },
-  { id: 10, text: "Tenggat waktu pekerjaan saya sering terlalu ketat.", isReversed: false, section: 4 },
-  { id: 11, text: "Saya sering harus bekerja lembur untuk menyelesaikan pekerjaan.", isReversed: false, section: 4 },
-  { id: 12, text: "Saya merasa sulit berkonsentrasi pada pekerjaan saya.", isReversed: false, section: 5 },
-  { id: 13, text: "Saya sering merasa lelah secara fisik setelah bekerja.", isReversed: false, section: 5 },
-  { id: 14, text: "Saya merasa sulit tidur karena memikirkan pekerjaan.", isReversed: false, section: 5 },
-  { id: 15, text: "Saya sering merasa cemas tentang pekerjaan saya.", isReversed: false, section: 6 },
-  { id: 16, text: "Saya merasa kehilangan motivasi dalam bekerja.", isReversed: false, section: 6 },
-];
-
-const sectionNames = {
-  1: "Beban Kerja",
-  2: "Hubungan Sosial di Tempat Kerja",
-  3: "Struktur dan Peran Pekerjaan",
-  4: "Tekanan Waktu",
-  5: "Dampak Stres",
-  6: "Keseimbangan Kerja dan Kehidupan"
-};
+import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
+import { translations } from './translations';
+import html2pdf from 'html2pdf.js';
 
 function App() {
+  const [language, setLanguage] = useState<'id' | 'en'>('id');
+  const t = translations[language]; // 't' for current translations
+
+  const questions = t.questions;
+  const sectionNames = t.sectionNames;
+
+  const handleExportPdf = () => {
+    const element = document.getElementById('wsq-results');
+    if (element) {
+      html2pdf().from(element).save('WSQ_Results.pdf');
+    }
+  };
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
   const [showResult, setShowResult] = useState(false);
 
@@ -109,8 +88,8 @@ function App() {
       icon: <BrainCircuit className="w-6 h-6" />
     };
     return {
-      level: "Stres Sangat Tinggi",
-      description: "Stres sangat tinggi dan mungkin berpengaruh negatif pada kesejahteraan fisik maupun mental Anda. Segera cari bantuan atau solusi atau dapat chat dengan Afiya untuk bantuan awal",
+      level: t.interpretation.veryHighStress.level,
+      description: t.interpretation.veryHighStress.description,
       color: "text-red-400",
       bgColor: "bg-red-900/20",
       borderColor: "border-red-400/50",
@@ -129,15 +108,33 @@ function App() {
         <div className="relative backdrop-blur-xl bg-white/10 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20 p-8 mb-8 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 pointer-events-none" />
           
-          <div className="relative flex items-center gap-6 mb-12 bg-white/5 p-8 rounded-2xl border border-white/10">
-            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-4 rounded-2xl shadow-lg">
-              <BrainCircuit className="w-10 h-10 text-white animate-pulse" />
+          <div className="relative flex items-center justify-between gap-6 mb-12 bg-white/5 p-8 rounded-2xl border border-white/10">
+            <div className="flex items-center gap-6">
+              <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-4 rounded-2xl shadow-lg">
+                <BrainCircuit className="w-10 h-10 text-white animate-pulse" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  {t.appTitle}
+                </h1>
+                <p className="text-white/60 mt-2 text-lg">{t.appSubtitle}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                Work Stress Questionnaire (WSQ)
-              </h1>
-              <p className="text-white/60 mt-2 text-lg">Evaluasi tingkat stres kerja Anda</p>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setLanguage('id')}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200
+                           ${language === 'id' ? 'bg-blue-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+              >
+                ID
+              </button>
+              <button 
+                onClick={() => setLanguage('en')}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200
+                           ${language === 'en' ? 'bg-blue-500 text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'}`}
+              >
+                EN
+              </button>
             </div>
           </div>
           
@@ -149,7 +146,7 @@ function App() {
               />
             </div>
             <p className="text-sm text-white/60 mt-3 text-center">
-              {Object.keys(answers).length} dari {questions.length} pertanyaan dijawab
+              {t.progressText(Object.keys(answers).length, questions.length)}
             </p>
           </div>
 
@@ -166,7 +163,7 @@ function App() {
                   {question.text}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                  {['Sangat Tidak Setuju', 'Tidak Setuju', 'Setuju', 'Sangat Setuju'].map((option, index) => (
+                  {t.answerOptions.map((option, index) => (
                     <label key={index} 
                       className={`relative flex items-center justify-center p-4 rounded-xl cursor-pointer
                                 border border-white/10 bg-white/5
@@ -220,8 +217,8 @@ function App() {
                          hover:shadow-lg disabled:shadow-none disabled:opacity-50 relative group">
               <span className="relative z-10">
                 {Object.keys(answers).length < questions.length 
-                  ? `Jawab ${questions.length - Object.keys(answers).length} pertanyaan lagi`
-                  : 'Lihat Hasil'}
+                  ? t.submitButton(questions.length - Object.keys(answers).length)
+                  : t.viewResultsButton}
               </span>
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-400 opacity-0 
                             group-hover:opacity-20 transition-opacity duration-300" />
@@ -229,7 +226,7 @@ function App() {
           </div>
 
           {showResult && (
-            <div className="mt-12 p-8 backdrop-blur-xl bg-white/5 rounded-2xl border border-white/20 
+            <div id="wsq-results" className="mt-12 p-8 backdrop-blur-xl bg-white/5 rounded-2xl border border-white/20 
                           shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
               <div className="flex items-center gap-4 mb-8">
                 <div className={`p-4 rounded-xl ${interpretation.bgColor} ${interpretation.borderColor} 
@@ -240,19 +237,19 @@ function App() {
                 </div>
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 
                              bg-clip-text text-transparent">
-                  Hasil Penilaian
+                  {t.resultsTitle}
                 </h2>
               </div>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                  <p className="text-lg">Skor Total:</p>
+                  <p className="text-lg">{t.totalScore}</p>
                   <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 
                                  bg-clip-text text-transparent">
                     {score}
                   </span>
                 </div>
                 <p className={`text-xl font-bold ${interpretation.color}`}>
-                  Level: {interpretation.level}
+                  {t.level} {interpretation.level}
                 </p>
                 <p className="text-white/80 leading-relaxed text-lg">
                   {interpretation.description}
@@ -261,7 +258,7 @@ function App() {
                 <div className="mt-8">
                   <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-blue-400 
                                 bg-clip-text text-transparent">
-                    Analisis per Bagian
+                    {t.sectionAnalysis}
                   </h3>
                   <div className="space-y-4">
                     {sectionScores.map((section, index) => (
@@ -271,7 +268,7 @@ function App() {
                             {section.name}
                           </p>
                           <span className="text-sm text-white/60">
-                            {section.score} poin
+                            {section.score} {t.points}
                           </span>
                         </div>
                         <div className="h-2 bg-white/10 rounded-full overflow-hidden">
@@ -284,13 +281,23 @@ function App() {
                     ))}
                   </div>
                 </div>
+                <button
+                  onClick={handleExportPdf}
+                  className="mt-8 w-full py-3 px-6 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl 
+                             font-medium hover:from-green-400 hover:to-teal-400 transition-all duration-300 
+                             hover:-translate-y-1 active:translate-y-0.5 hover:shadow-lg relative group"
+                >
+                  <span className="relative z-10">Export to PDF</span>
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-green-400 to-teal-400 opacity-0 
+                                group-hover:opacity-20 transition-opacity duration-300" />
+                </button>
               </div>
             </div>
           )}
         </div>
 
         <footer className="text-center text-white/60 py-4">
-          <p>veldyva</p>
+          <p>{t.footerText}</p>
         </footer>
       </div>
     </div>
