@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
-import { translations } from './translations';
 
 
 function App() {
@@ -12,11 +11,34 @@ function App() {
 
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
-    if (element) {
-      // Add a small delay to ensure all content is rendered
-      setTimeout(() => {
-        window.html2pdf().from(element).save('WSQ_Results.pdf');
-      }, 500); // 500ms delay
+    if (element && window.html2pdf) {
+      const opt = {
+        margin: 1,
+        filename: 'WSQ_Results.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      
+      // Clone the element and modify styles for better PDF rendering
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      clonedElement.style.background = 'white';
+      clonedElement.style.color = 'black';
+      clonedElement.style.padding = '20px';
+      
+      // Create a temporary container
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '800px';
+      tempContainer.appendChild(clonedElement);
+      document.body.appendChild(tempContainer);
+      
+      // Generate PDF
+      window.html2pdf().set(opt).from(clonedElement).save().then(() => {
+        document.body.removeChild(tempContainer);
+      });
     }
   };
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
