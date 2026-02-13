@@ -93,27 +93,35 @@ function App() {
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
     if (element) {
-      // Use html2canvas directly for debugging
-      window.html2canvas(element, { 
-        scale: 2, 
-        logging: true, 
-        useCORS: true, 
-        allowTaint: true,
-        scrollY: -window.scrollY,
-        scrollX: -window.scrollX,
-      }).then((canvas) => {
-        // Append the canvas to the body for visual inspection
-        document.body.appendChild(canvas);
-        console.log('html2canvas generated canvas:', canvas);
-        // You can also try to download the image directly
-        // const imgData = canvas.toDataURL('image/png');
-        // const link = document.createElement('a');
-        // link.href = imgData;
-        // link.download = 'debug_wsq_results.png';
-        // link.click();
-      }).catch(error => {
-        console.error('Error generating canvas with html2canvas:', error);
-      });
+      const opt = {
+        margin: 1,
+        filename: 'WSQ_Results.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2, // Increase scale for better resolution
+          logging: true, // Enable logging for debugging
+          useCORS: true, // Try using CORS
+          allowTaint: true, // Allow tainting for cross-origin images (if any)
+          scrollY: -window.scrollY, // Capture full scrollable content
+          scrollX: -window.scrollX,
+          // Add custom CSS to force text color to black
+          onclone: (document) => {
+            const style = document.createElement('style');
+            style.innerHTML = `
+              #wsq-results * {
+                color: #000 !important;
+                background-color: transparent !important;
+              }
+              #wsq-results h1, #wsq-results h2, #wsq-results h3, #wsq-results span {
+                -webkit-text-fill-color: #000 !important; /* For bg-clip-text */
+              }
+            `;
+            document.head.appendChild(style);
+          }
+        },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      window.html2pdf().set(opt).from(element).save();
     }
   };
 
@@ -246,7 +254,7 @@ function App() {
           </div>
 
           {showResult && (
-            <div id="wsq-results" className="mt-12 p-8 bg-white text-black rounded-lg shadow-lg">
+            <div id="wsq-results" className="mt-12 p-8 bg-white text-gray-900 rounded-lg shadow-lg">
               <div className="flex items-center gap-4 mb-8">
                 <div className={`p-4 rounded-xl ${interpretation.bgColor} ${interpretation.borderColor} 
                                border shadow-lg`}>
@@ -254,14 +262,14 @@ function App() {
                     {interpretation.icon}
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-800">
+                <h2 className="text-2xl font-bold text-gray-900">
                   {t.resultsTitle}
                 </h2>
               </div>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
                   <p className="text-lg">{t.totalScore}</p>
-                  <span className="text-2xl font-bold text-gray-800">
+                  <span className="text-2xl font-bold text-gray-900">
                     {score}
                   </span>
                 </div>
@@ -273,14 +281,14 @@ function App() {
                 </p>
 
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold mb-4 text-gray-800">
+                  <h3 className="text-xl font-bold mb-4 text-gray-900">
                     {t.sectionAnalysis}
                   </h3>
                   <div className="space-y-4">
                     {sectionScores.map((section, index) => (
                       <div key={section.section} className="p-4 bg-gray-100 rounded-xl border border-gray-200">
                         <div className="flex justify-between items-center mb-2">
-                          <p className="font-medium">
+                          <p className="font-medium text-gray-800">
                             {section.name}
                           </p>
                           <span className="text-sm text-gray-600">
