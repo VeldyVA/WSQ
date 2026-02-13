@@ -95,19 +95,42 @@ function App() {
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
     if (element) {
-      // Store original styles
+      // Store original styles and elements
       const originalBg = element.style.backgroundColor;
       const originalColor = element.style.color;
+      const originalBackdrop = element.style.backdropFilter;
+      const originalBgClass = element.className;
+      
+      // Hide icon and description
+      const iconElement = element.querySelector('div[class*="shadow-lg"]');
+      const descriptionElement = Array.from(element.querySelectorAll('p')).find(p => p.textContent.includes('stress') || p.textContent.includes('Stress'));
+      const originalIconDisplay = iconElement?.style.display;
+      const originalDescDisplay = descriptionElement?.style.display;
+      
+      if (iconElement) iconElement.style.display = 'none';
+      if (descriptionElement) descriptionElement.style.display = 'none';
       
       // Set background and text color for PDF export
       element.style.backgroundColor = '#ffffff';
-      element.style.color = '#000000';
-      
-      // Also handle backdrop blur and transparency
-      const originalBackdrop = element.style.backdropFilter;
-      const originalBgClass = element.className;
       element.style.backdropFilter = 'none';
       element.className = element.className.replace(/bg-white\/\d+|backdrop-blur-\w+/g, 'bg-white');
+      
+      // Change all text to black except the stress level
+      const allElements = element.querySelectorAll('*');
+      const originalColors: { [key: string]: string } = {};
+      
+      allElements.forEach((el, index) => {
+        const computedStyle = window.getComputedStyle(el);
+        const currentColor = computedStyle.color;
+        
+        // Store original color and set to black, except for level interpretation
+        if (!el.textContent.includes(interpretation.level)) {
+          originalColors[`el-${index}`] = el.style.color;
+          if (el instanceof HTMLElement) {
+            el.style.color = '#000000';
+          }
+        }
+      });
       
       html2canvas(element, { 
         scale: 2, 
@@ -137,16 +160,25 @@ function App() {
         
         // Restore original styles
         element.style.backgroundColor = originalBg;
-        element.style.color = originalColor;
         element.style.backdropFilter = originalBackdrop;
         element.className = originalBgClass;
+        if (iconElement) iconElement.style.display = originalIconDisplay || '';
+        if (descriptionElement) descriptionElement.style.display = originalDescDisplay || '';
+        
+        // Restore all element colors
+        allElements.forEach((el, index) => {
+          if (el instanceof HTMLElement && originalColors[`el-${index}`] !== undefined) {
+            el.style.color = originalColors[`el-${index}`];
+          }
+        });
       }).catch(error => {
         console.error('Error generating PDF:', error);
         // Restore original styles even if error occurs
         element.style.backgroundColor = originalBg;
-        element.style.color = originalColor;
         element.style.backdropFilter = originalBackdrop;
         element.className = originalBgClass;
+        if (iconElement) iconElement.style.display = originalIconDisplay || '';
+        if (descriptionElement) descriptionElement.style.display = originalDescDisplay || '';
       });
     }
   };
