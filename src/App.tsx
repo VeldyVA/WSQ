@@ -104,11 +104,26 @@ function App() {
       // Hide icon and description
       const iconElement = element.querySelector('div[class*="shadow-lg"]');
       const descriptionElement = Array.from(element.querySelectorAll('p')).find(p => p.textContent.includes('stress') || p.textContent.includes('Stress'));
+      
+      // Hide titles with gradient backgrounds (Results Title and Section Analysis)
+      const gradientTitles = Array.from(element.querySelectorAll('h2, h3')).filter(el => 
+        el.className.includes('bg-gradient') || el.className.includes('bg-clip-text')
+      );
+      
+      // Hide the export button
+      const exportButton = element.querySelector('button');
+      
+      // Store original displays
       const originalIconDisplay = iconElement?.style.display;
       const originalDescDisplay = descriptionElement?.style.display;
+      const originalTitleDisplays = gradientTitles.map(el => el.style.display);
+      const originalButtonDisplay = exportButton?.style.display;
       
+      // Hide elements
       if (iconElement) iconElement.style.display = 'none';
       if (descriptionElement) descriptionElement.style.display = 'none';
+      gradientTitles.forEach(el => el.style.display = 'none');
+      if (exportButton) exportButton.style.display = 'none';
       
       // Set background and text color for PDF export
       element.style.backgroundColor = '#ffffff';
@@ -164,6 +179,8 @@ function App() {
         element.className = originalBgClass;
         if (iconElement) iconElement.style.display = originalIconDisplay || '';
         if (descriptionElement) descriptionElement.style.display = originalDescDisplay || '';
+        gradientTitles.forEach((el, idx) => el.style.display = originalTitleDisplays[idx] || '');
+        if (exportButton) exportButton.style.display = originalButtonDisplay || '';
         
         // Restore all element colors
         allElements.forEach((el, index) => {
@@ -179,6 +196,8 @@ function App() {
         element.className = originalBgClass;
         if (iconElement) iconElement.style.display = originalIconDisplay || '';
         if (descriptionElement) descriptionElement.style.display = originalDescDisplay || '';
+        gradientTitles.forEach((el, idx) => el.style.display = originalTitleDisplays[idx] || '');
+        if (exportButton) exportButton.style.display = originalButtonDisplay || '';
       });
     }
   };
