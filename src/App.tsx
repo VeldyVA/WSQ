@@ -93,21 +93,27 @@ function App() {
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
     if (element) {
-      const opt = {
-        margin: 1,
-        filename: 'WSQ_Results.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2, // Increase scale for better resolution
-          logging: true, // Enable logging for debugging
-          useCORS: true, // Try using CORS
-          allowTaint: true, // Allow tainting for cross-origin images (if any)
-          scrollY: -window.scrollY, // Capture full scrollable content
-          scrollX: -window.scrollX,
-        },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      window.html2pdf().set(opt).from(element).save();
+      // Use html2canvas directly for debugging
+      window.html2canvas(element, { 
+        scale: 2, 
+        logging: true, 
+        useCORS: true, 
+        allowTaint: true,
+        scrollY: -window.scrollY,
+        scrollX: -window.scrollX,
+      }).then((canvas) => {
+        // Append the canvas to the body for visual inspection
+        document.body.appendChild(canvas);
+        console.log('html2canvas generated canvas:', canvas);
+        // You can also try to download the image directly
+        // const imgData = canvas.toDataURL('image/png');
+        // const link = document.createElement('a');
+        // link.href = imgData;
+        // link.download = 'debug_wsq_results.png';
+        // link.click();
+      }).catch(error => {
+        console.error('Error generating canvas with html2canvas:', error);
+      });
     }
   };
 
