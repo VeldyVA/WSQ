@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
+import { translations } from './translations';
 
 
 function App() {
