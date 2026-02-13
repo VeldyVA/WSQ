@@ -12,34 +12,22 @@ function App() {
 
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
-    if (element && window.html2pdf) {
+    if (element) {
       const opt = {
         margin: 1,
         filename: 'WSQ_Results.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { 
+          scale: 2, // Increase scale for better resolution
+          logging: true, // Enable logging for debugging
+          useCORS: true, // Try using CORS
+          allowTaint: true, // Allow tainting for cross-origin images (if any)
+          scrollY: -window.scrollY, // Capture full scrollable content
+          scrollX: -window.scrollX,
+        },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
-      
-      // Clone the element and modify styles for better PDF rendering
-      const clonedElement = element.cloneNode(true) as HTMLElement;
-      clonedElement.style.background = 'white';
-      clonedElement.style.color = 'black';
-      clonedElement.style.padding = '20px';
-      
-      // Create a temporary container
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '0';
-      tempContainer.style.width = '800px';
-      tempContainer.appendChild(clonedElement);
-      document.body.appendChild(tempContainer);
-      
-      // Generate PDF
-      window.html2pdf().set(opt).from(clonedElement).save().then(() => {
-        document.body.removeChild(tempContainer);
-      });
+      window.html2pdf().set(opt).from(element).save();
     }
   };
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
