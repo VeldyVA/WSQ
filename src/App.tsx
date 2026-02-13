@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
 import { translations } from './translations';
+import html2pdf from 'html2pdf.js'; // Import as module
 
 function App() {
   const [language, setLanguage] = useState<'id' | 'en'>('id');
@@ -104,24 +105,10 @@ function App() {
           allowTaint: true, // Allow tainting for cross-origin images (if any)
           scrollY: -window.scrollY, // Capture full scrollable content
           scrollX: -window.scrollX,
-          // Add custom CSS to force text color to black
-          onclone: (document) => {
-            const style = document.createElement('style');
-            style.innerHTML = `
-              #wsq-results * {
-                color: #000 !important;
-                background-color: transparent !important;
-              }
-              #wsq-results h1, #wsq-results h2, #wsq-results h3, #wsq-results span {
-                -webkit-text-fill-color: #000 !important; /* For bg-clip-text */
-              }
-            `;
-            document.head.appendChild(style);
-          }
         },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
-      window.html2pdf().set(opt).from(element).save();
+      html2pdf().set(opt).from(element).save();
     }
   };
 
@@ -254,7 +241,8 @@ function App() {
           </div>
 
           {showResult && (
-            <div id="wsq-results" className="mt-12 p-8 bg-white text-gray-900 rounded-lg shadow-lg">
+            <div id="wsq-results" className="mt-12 p-8 backdrop-blur-xl bg-white/5 rounded-2xl border border-white/20 
+                          shadow-[0_8px_32px_0_rgba(31,38,135,0.37)]">
               <div className="flex items-center gap-4 mb-8">
                 <div className={`p-4 rounded-xl ${interpretation.bgColor} ${interpretation.borderColor} 
                                border shadow-lg`}>
@@ -262,42 +250,45 @@ function App() {
                     {interpretation.icon}
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 
+                             bg-clip-text text-transparent">
                   {t.resultsTitle}
                 </h2>
               </div>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
                   <p className="text-lg">{t.totalScore}</p>
-                  <span className="text-2xl font-bold text-gray-900">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 
+                                 bg-clip-text text-transparent">
                     {score}
                   </span>
                 </div>
                 <p className={`text-xl font-bold ${interpretation.color}`}>
                   {t.level} {interpretation.level}
                 </p>
-                <p className="text-gray-700 leading-relaxed text-lg">
+                <p className="text-white/80 leading-relaxed text-lg">
                   {interpretation.description}
                 </p>
 
                 <div className="mt-8">
-                  <h3 className="text-xl font-bold mb-4 text-gray-900">
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 
+                                bg-clip-text text-transparent">
                     {t.sectionAnalysis}
                   </h3>
                   <div className="space-y-4">
                     {sectionScores.map((section, index) => (
-                      <div key={section.section} className="p-4 bg-gray-100 rounded-xl border border-gray-200">
+                      <div key={section.section} className="p-4 bg-white/5 rounded-xl border border-white/10">
                         <div className="flex justify-between items-center mb-2">
-                          <p className="font-medium text-gray-800">
+                          <p className="font-medium">
                             {section.name}
                           </p>
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-white/60">
                             {section.score} {t.points}
                           </span>
                         </div>
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-blue-500"
+                            className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
                             style={{ width: `${section.percentage}%` }}
                           />
                         </div>
@@ -307,10 +298,13 @@ function App() {
                 </div>
                 <button
                   onClick={handleExportPdf}
-                  className="mt-8 w-full py-3 px-6 bg-blue-500 text-white rounded-xl 
-                             font-medium hover:bg-blue-600 transition-all duration-300"
+                  className="mt-8 w-full py-3 px-6 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl 
+                             font-medium hover:from-green-400 hover:to-teal-400 transition-all duration-300 
+                             hover:-translate-y-1 active:translate-y-0.5 hover:shadow-lg relative group"
                 >
                   <span className="relative z-10">Export to PDF</span>
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-green-400 to-teal-400 opacity-0 
+                                group-hover:opacity-20 transition-opacity duration-300" />
                 </button>
               </div>
             </div>
