@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
 import { translations } from './translations';
-import html2pdf from 'html2pdf.js'; // Import as module
+import * as html2pdf from 'html2pdf.js'; // Import as namespace
 
 function App() {
   const [language, setLanguage] = useState<'id' | 'en'>('id');
@@ -108,7 +108,7 @@ function App() {
         },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
-      html2pdf().set(opt).from(element).save();
+      html2pdf.default().set(opt).from(element).save();
     }
   };
 
