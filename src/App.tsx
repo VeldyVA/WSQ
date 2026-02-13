@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Brain, Coffee, BrainCircuit, Globe } from 'lucide-react';
 import { translations } from './translations';
-import * as html2pdf from 'html2pdf.js'; // Import as namespace
+import html2canvas from 'html2canvas'; // Import html2canvas
+import jsPDF from 'jspdf'; // Import jsPDF
 
 function App() {
   const [language, setLanguage] = useState<'id' | 'en'>('id');
@@ -94,21 +95,59 @@ function App() {
   const handleExportPdf = () => {
     const element = document.getElementById('wsq-results');
     if (element) {
-      const opt = {
-        margin: 1,
-        filename: 'WSQ_Results.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2, // Increase scale for better resolution
-          logging: true, // Enable logging for debugging
-          useCORS: true, // Try using CORS
-          allowTaint: true, // Allow tainting for cross-origin images (if any)
-          scrollY: -window.scrollY, // Capture full scrollable content
-          scrollX: -window.scrollX,
-        },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-      html2pdf.default().set(opt).from(element).save();
+      // Store original styles
+      const originalBg = element.style.backgroundColor;
+      const originalColor = element.style.color;
+      
+      // Set background and text color for PDF export
+      element.style.backgroundColor = '#ffffff';
+      element.style.color = '#000000';
+      
+      // Also handle backdrop blur and transparency
+      const originalBackdrop = element.style.backdropFilter;
+      const originalBgClass = element.className;
+      element.style.backdropFilter = 'none';
+      element.className = element.className.replace(/bg-white\/\d+|backdrop-blur-\w+/g, 'bg-white');
+      
+      html2canvas(element, { 
+        scale: 2, 
+        logging: false, 
+        useCORS: true, 
+        allowTaint: true,
+        backgroundColor: '#ffffff'
+      }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 297; // A4 height in mm
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        pdf.save('WSQ_Results.pdf');
+        
+        // Restore original styles
+        element.style.backgroundColor = originalBg;
+        element.style.color = originalColor;
+        element.style.backdropFilter = originalBackdrop;
+        element.className = originalBgClass;
+      }).catch(error => {
+        console.error('Error generating PDF:', error);
+        // Restore original styles even if error occurs
+        element.style.backgroundColor = originalBg;
+        element.style.color = originalColor;
+        element.style.backdropFilter = originalBackdrop;
+        element.className = originalBgClass;
+      });
     }
   };
 
@@ -168,7 +207,7 @@ function App() {
           <div className="space-y-8">
             {questions.map((question) => (
               <div key={question.id} 
-                className="p-6 backdrop-blur-lg bg-white/5 rounded-2xl border border-white/10 shadow-lg 
+                className="p-6 backdrop-blur-xl bg-white/5 rounded-2xl border border-white/10 shadow-lg 
                           hover:bg-white/10 transition-all duration-300 group">
                 <p className="mb-6 font-medium text-lg flex items-start gap-4">
                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 
